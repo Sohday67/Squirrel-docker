@@ -31,3 +31,15 @@ financecontrolWidget/Assets.xcassets/SquirrelLogoImage.imageset/*.png
 /Squirrel.xcodeproj/project.xcworkspace/xcuserdata
 
 CommitMessage.md
+
+.env
+
+# Node.js
+node_modules/
+package-lock.json
+npm-debug.log*
+
+# Build artifacts
+build/
+dist/
+*.ipa

@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: squirrel
+      POSTGRES_PASSWORD: squirrel
+      POSTGRES_DB: squirrel
+    volumes:
+      - squirrel-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U squirrel"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  server:
+    build: ./server
+    ports:
+      - "3001:3001"
+    environment:
+      DATABASE_URL: postgresql://squirrel:squirrel@db:5432/squirrel
+      JWT_SECRET: ${JWT_SECRET}
+      NODE_ENV: production
+      PORT: "3001"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  web:
+    build: ./web
+    ports:
+      - "3000:80"
+    depends_on:
+      - server
+    restart: unless-stopped
+
+volumes:
+  squirrel-data:

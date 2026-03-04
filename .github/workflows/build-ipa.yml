@@ -1,0 +1,56 @@
+name: Build Unsigned IPA
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Select Xcode version
+        run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: List available schemes
+        run: xcodebuild -list -project Squirrel.xcodeproj
+
+      - name: Build for iOS Simulator (unsigned)
+        run: |
+          xcodebuild clean build \
+            -project Squirrel.xcodeproj \
+            -scheme financecontrol \
+            -destination 'generic/platform=iOS' \
+            -configuration Release \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            -archivePath $RUNNER_TEMP/Squirrel.xcarchive \
+            archive
+
+      - name: Create unsigned IPA
+        run: |
+          mkdir -p $RUNNER_TEMP/Payload
+          cp -r $RUNNER_TEMP/Squirrel.xcarchive/Products/Applications/*.app $RUNNER_TEMP/Payload/
+          cd $RUNNER_TEMP
+          zip -r Squirrel-unsigned.ipa Payload
+          mv Squirrel-unsigned.ipa $GITHUB_WORKSPACE/
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Squirrel-unsigned-ipa
+          path: Squirrel-unsigned.ipa
+          retention-days: 30
