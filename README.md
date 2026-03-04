@@ -43,7 +43,71 @@ Filter expenses by date, category, currency and more with powerful and simple fi
 
 Squirrel now includes a web version and a Docker-based backend server for cross-platform data sync with user authentication and two-factor authentication (2FA) via TOTP (compatible with Ente Auth, Google Authenticator, etc.).
 
-### Quick Start with Docker
+### Hosting with Tailscale (HTTPS via `*.ts.net`)
+
+The recommended way to expose Squirrel with automatic HTTPS is through [Tailscale](https://tailscale.com). Tailscale assigns your machine a DNS name like `squirrel.<tailnet>.ts.net` and provisions a TLS certificate automatically — no port-forwarding, no Certbot, no public IP required.
+
+#### Prerequisites
+
+1. A [Tailscale account](https://login.tailscale.com) (free tier works).
+2. [MagicDNS](https://tailscale.com/kb/1081/magicdns) enabled on your tailnet (enabled by default).
+3. [HTTPS certificates](https://tailscale.com/kb/1153/enabling-https) enabled on your tailnet (Tailscale admin console → DNS → Enable HTTPS).
+4. An **auth key** generated at <https://login.tailscale.com/admin/settings/keys>. Check _Reusable_ and _Ephemeral_ if you want automatic reconnects.
+
+#### Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/Sohday67/Squirrel-docker.git
+cd Squirrel-docker
+
+# Configure environment variables
+cat > .env <<EOF
+JWT_SECRET=$(openssl rand -hex 32)
+TS_AUTHKEY=tskey-auth-XXXX          # paste your Tailscale auth key
+TS_HOSTNAME=squirrel                # machine name on your tailnet
+EOF
+
+# Start the stack with the Tailscale overlay
+docker compose -f docker-compose.yml -f docker-compose.tailscale.yml up -d
+```
+
+Once the containers are running, Squirrel is reachable at:
+
+```
+https://squirrel.<your-tailnet>.ts.net
+```
+
+Only devices on your Tailscale network can access this URL. Traffic between your device and the Tailscale container is encrypted with a valid TLS certificate; internal traffic between containers stays on an isolated Docker network.
+
+#### How it works
+
+| Container   | Role |
+|-------------|------|
+| `tailscale` | Joins your tailnet, obtains a TLS cert, and reverse-proxies HTTPS traffic to the `web` and `server` containers using [Tailscale Serve](https://tailscale.com/kb/1312/serve). |
+| `web`       | Nginx serving the Squirrel web frontend (no host port exposed). |
+| `server`    | Node.js API backend (no host port exposed). |
+| `db`        | PostgreSQL database (internal only). |
+
+The Tailscale Serve config (`tailscale/serve.json`) routes:
+- `/api/*` → `http://server:3001` (backend API)
+- `/*` → `http://web:80` (web frontend)
+
+#### iOS app configuration
+
+In the Squirrel iOS app, go to **Settings → Account & Sync** and set the server URL to:
+
+```
+https://squirrel.<your-tailnet>.ts.net
+```
+
+Make sure your iOS device is connected to the same Tailscale network (install the [Tailscale iOS app](https://apps.apple.com/app/tailscale/id1470499037)).
+
+#### Tailscale without the overlay
+
+If you prefer to run Tailscale on the host instead of in Docker, simply start the stack with the base compose file (`docker compose up -d`) and use [`tailscale serve`](https://tailscale.com/kb/1312/serve) on the host to proxy to `localhost:3000`.
+
+### Quick Start with Docker (no Tailscale)
 
 ```bash
 # Clone the repository
