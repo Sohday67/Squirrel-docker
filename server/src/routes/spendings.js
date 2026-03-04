@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
       if (endDate) where.date[Op.lte] = endDate;
     }
 
-    const offset = (Math.max(1, parseInt(page, 10)) - 1) * parseInt(limit, 10);
+    const offset = (Math.max(0, parseInt(page, 10) - 1)) * parseInt(limit, 10);
     const { count, rows } = await Spending.findAndCountAll({
       where,
       include: [{ model: Category, attributes: ['id', 'name', 'color'] }],
@@ -33,6 +33,23 @@ router.get('/', async (req, res) => {
     });
   } catch (err) {
     console.error('List spendings error:', err);
+    return res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+// GET /api/spendings/:id
+router.get('/:id', async (req, res) => {
+  try {
+    const spending = await Spending.findOne({
+      where: { id: req.params.id, userId: req.user.id },
+      include: [{ model: Category, attributes: ['id', 'name', 'color'] }],
+    });
+    if (!spending) {
+      return res.status(404).json({ success: false, error: 'Spending not found' });
+    }
+    return res.json({ success: true, data: spending });
+  } catch (err) {
+    console.error('Get spending error:', err);
     return res.status(500).json({ success: false, error: 'Internal server error' });
   }
 });

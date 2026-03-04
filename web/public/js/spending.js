@@ -122,11 +122,11 @@ const Spending = (() => {
     async function renderEditSpending(id) {
         let spending, categories;
         try {
-            const [data, cats] = await Promise.all([
-                API.spendings.list({ limit: 500 }),
+            const [spendingData, cats] = await Promise.all([
+                API.spendings.get(id),
                 Categories.getCategories()
             ]);
-            spending = data.spendings.find(s => s.id === id);
+            spending = spendingData;
             categories = cats;
             if (!spending) throw new Error('Not found');
         } catch (err) {

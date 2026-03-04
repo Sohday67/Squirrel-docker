@@ -72,6 +72,7 @@ const API = (() => {
             const q = new URLSearchParams(params).toString();
             return request('GET', `/spendings${q ? '?' + q : ''}`);
         },
+        get: (id) => request('GET', `/spendings/${id}`),
         create: (data) => request('POST', '/spendings', data),
         update: (id, data) => request('PUT', `/spendings/${id}`, data),
         delete: (id) => request('DELETE', `/spendings/${id}`),
