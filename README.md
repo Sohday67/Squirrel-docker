@@ -39,6 +39,45 @@ Track expenses in 150+ currencies that are updated every hour. Squirrel automati
 Filter expenses by date, category, currency and more with powerful and simple filters. Export filtered data to CSV with many formatting options and back up your expenses locally to a JSON file.
 ![Filters and Export](README/Screenshots/GitHubFilters_v5.png)
 
+## Web Version & Server Deployment
+
+Squirrel now includes a web version and a Docker-based backend server for cross-platform data sync with user authentication and two-factor authentication (2FA) via TOTP (compatible with Ente Auth, Google Authenticator, etc.).
+
+### Quick Start with Docker
+
+```bash
+# Clone the repository
+git clone https://github.com/Sohday67/Squirrel-docker.git
+cd Squirrel-docker
+
+# Set a secure JWT secret in .env
+echo "JWT_SECRET=$(openssl rand -hex 32)" > .env
+
+# Start all services
+docker compose up -d
+```
+
+This starts three services:
+- **Web Frontend**: http://localhost:3000
+- **API Server**: http://localhost:3001
+- **PostgreSQL Database**: Internal (port 5432)
+
+### Features (Web & iOS)
+
+- **User Authentication**: Register/login with username, email, and password
+- **Two-Factor Authentication**: TOTP-based 2FA compatible with Ente Auth
+- **Data Sync**: Spendings, categories, and returns sync between iOS app and web
+- **iCloud Backup**: Optional iCloud backup toggle in iOS settings
+- **Full Expense Tracking**: Same features as the iOS app—categories, multi-currency, statistics, charts, CSV/JSON export
+
+### iOS App Configuration
+
+After building the iOS app, configure the server URL in **Settings → Account & Sync** to point to your deployed server. Sign in or create an account to start syncing data.
+
+### Building the Unsigned IPA
+
+The repository includes a GitHub Actions workflow that automatically builds an unsigned IPA on every push to `main`. You can also trigger it manually from the Actions tab. The IPA artifact is available for download from the workflow run.
+
 ## Testing
 
 Squirrel does not have automated tests for now, but it is actively tested on devices running the latest iOS 15, 18, and 26. Feel free to open [an issue](https://github.com/PinkXaciD/Squirrel/issues/new) if anything goes wrong.

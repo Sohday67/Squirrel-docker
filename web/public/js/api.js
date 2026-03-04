@@ -45,13 +45,14 @@ const API = (() => {
 
         if (res.status === 204) return null;
 
-        const data = await res.json();
+        const json = await res.json();
 
         if (!res.ok) {
-            throw new Error(data.error || data.message || `Request failed (${res.status})`);
+            throw new Error(json.error || json.message || `Request failed (${res.status})`);
         }
 
-        return data;
+        // Unwrap { success, data } envelope
+        return json.data !== undefined ? json.data : json;
     }
 
     // Auth

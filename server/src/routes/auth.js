@@ -252,11 +252,13 @@ router.get('/me', authenticate, async (req, res) => {
   return res.json({
     success: true,
     data: {
-      id: req.user.id,
-      username: req.user.username,
-      email: req.user.email,
-      twoFactorEnabled: req.user.twoFactorEnabled,
-      createdAt: req.user.createdAt,
+      user: {
+        id: req.user.id,
+        username: req.user.username,
+        email: req.user.email,
+        twoFactorEnabled: req.user.twoFactorEnabled,
+        createdAt: req.user.createdAt,
+      },
     },
   });
 });

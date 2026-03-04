@@ -4,7 +4,8 @@ const Settings = (() => {
     async function render() {
         let user;
         try {
-            user = await API.auth.getMe();
+            const data = await API.auth.getMe();
+            user = data.user || data;
         } catch (err) {
             user = null;
         }
