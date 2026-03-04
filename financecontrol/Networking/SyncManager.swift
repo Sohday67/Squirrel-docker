@@ -11,7 +11,7 @@ class SyncManager: ObservableObject {
     private let apiClient = APIClient.shared
     private let dateFormatter: ISO8601DateFormatter = {
         let f = ISO8601DateFormatter()
-        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        f.formatOptions = [.withInternetDateTime]
         return f
     }()
 

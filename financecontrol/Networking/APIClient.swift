@@ -108,8 +108,8 @@ class APIClient: ObservableObject {
         return data
     }
 
-    func enable2FA(code: String, secret: String) async throws {
-        let body: [String: Any] = ["code": code, "secret": secret]
+    func enable2FA(code: String) async throws {
+        let body: [String: Any] = ["code": code]
         let response: AuthResponse = try await request(path: "/api/auth/enable-2fa", method: "POST", body: body)
         guard response.success else {
             throw APIError.serverError(response.error ?? "Failed to enable 2FA")

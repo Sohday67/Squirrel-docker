@@ -136,7 +136,7 @@ struct TwoFactorSetupView: View {
 
         Task {
             do {
-                try await apiClient.enable2FA(code: code, secret: secret)
+                try await apiClient.enable2FA(code: code)
                 await MainActor.run {
                     isLoading = false
                     dismiss()
